@@ -45,7 +45,7 @@ class PDFConverterApp:
         self.pdf_path = tk.StringVar()
         self.output_dir = tk.StringVar()
         self.scale_var = tk.StringVar(value=str(DEFAULT_SCALE))
-        self.keep_png_var = tk.BooleanVar(value=True)
+        self.keep_png_var = tk.BooleanVar(value=False)
         self.status_var = tk.StringVar(value="就绪")
         self.progress_var = tk.DoubleVar(value=0)
 
