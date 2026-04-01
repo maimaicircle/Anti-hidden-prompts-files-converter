@@ -177,7 +177,6 @@ class PDFConverterApp:
             elif sys.platform == "darwin":
                 subprocess.Popen(["open", path])
             else:
-                import subprocess
                 subprocess.Popen(["xdg-open", path])
         except Exception as e:
             messagebox.showerror("Error", f"Unable to open output directory: {e}")
