@@ -19,6 +19,7 @@ import sys
 import threading
 import traceback
 import tkinter as tk
+import subprocess
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
