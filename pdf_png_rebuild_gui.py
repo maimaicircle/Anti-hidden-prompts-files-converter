@@ -3,14 +3,14 @@
 
 """
 PDF -> PNG pages -> rebuilt PDF GUI
-依赖:
+depends on:
     pip install pymupdf pillow
 
-功能:
-1. 选择一个 PDF
-2. 自动把每一页导出为 PNG
-3. 再把这些 PNG 合成为一个新的 PDF
-4. 输出到用户指定目录
+How does it work:
+1. Select a PDF file and an output directory
+2. Automatically export each page of the PDF as a PNG image (with adjustable scale)
+3. Merge the PNG images back into a new PDF (with the same page size as the original)
+4. Output the new PDF to the selected directory, with "_rebuilt_from_png" suffix
 """
 
 import os
@@ -31,8 +31,8 @@ except Exception:
     Image = None
 
 
-APP_TITLE = "PDF 每页转 PNG 后重组为 PDF"
-DEFAULT_SCALE = 2.0  # 约等于 144 DPI
+APP_TITLE = "PDF to PNG then Rebuild to PDF"
+DEFAULT_SCALE = 2.0  # Approximately 144 DPI
 
 
 class PDFConverterApp:
@@ -46,7 +46,7 @@ class PDFConverterApp:
         self.output_dir = tk.StringVar()
         self.scale_var = tk.StringVar(value=str(DEFAULT_SCALE))
         self.keep_png_var = tk.BooleanVar(value=False)
-        self.status_var = tk.StringVar(value="就绪")
+        self.status_var = tk.StringVar(value="Ready")
         self.progress_var = tk.DoubleVar(value=0)
 
         self._build_ui()
@@ -61,36 +61,36 @@ class PDFConverterApp:
 
         desc = ttk.Label(
             main,
-            text="选择 PDF 后，程序会先把每一页导出为 PNG，再把这些 PNG 重新合成为一个新的 PDF。",
+            text="Select a PDF file and an output directory. The program will export each page as a PNG image and then merge them into a new PDF.",
             wraplength=700,
         )
         desc.pack(anchor="w", pady=(0, 16))
 
         # PDF input
-        pdf_frame = ttk.LabelFrame(main, text="1. 选择输入 PDF", padding=12)
+        pdf_frame = ttk.LabelFrame(main, text="1. Select Input PDF", padding=12)
         pdf_frame.pack(fill="x", pady=(0, 12))
 
         ttk.Entry(pdf_frame, textvariable=self.pdf_path).pack(side="left", fill="x", expand=True, padx=(0, 8))
-        ttk.Button(pdf_frame, text="浏览…", command=self.browse_pdf).pack(side="left")
+        ttk.Button(pdf_frame, text="Browse…", command=self.browse_pdf).pack(side="left")
 
         # Output
-        out_frame = ttk.LabelFrame(main, text="2. 选择输出目录", padding=12)
+        out_frame = ttk.LabelFrame(main, text="2. Select Output Directory", padding=12)
         out_frame.pack(fill="x", pady=(0, 12))
 
         ttk.Entry(out_frame, textvariable=self.output_dir).pack(side="left", fill="x", expand=True, padx=(0, 8))
-        ttk.Button(out_frame, text="浏览…", command=self.browse_output_dir).pack(side="left")
+        ttk.Button(out_frame, text="Browse…", command=self.browse_output_dir).pack(side="left")
 
         # Options
-        opt_frame = ttk.LabelFrame(main, text="3. 参数", padding=12)
+        opt_frame = ttk.LabelFrame(main, text="3. Parameters", padding=12)
         opt_frame.pack(fill="x", pady=(0, 12))
 
-        ttk.Label(opt_frame, text="渲染倍率 scale：").grid(row=0, column=0, sticky="w")
+        ttk.Label(opt_frame, text="Rendering Scale:").grid(row=0, column=0, sticky="w")
         ttk.Entry(opt_frame, textvariable=self.scale_var, width=10).grid(row=0, column=1, sticky="w", padx=(8, 24))
-        ttk.Label(opt_frame, text="建议 2.0；越大越清晰，但文件越大").grid(row=0, column=2, sticky="w")
+        ttk.Label(opt_frame, text="Recommended 2.0; higher values result in clearer images but larger files").grid(row=0, column=2, sticky="w")
 
         ttk.Checkbutton(
             opt_frame,
-            text="保留中间 PNG 文件",
+            text="Keep Intermediate PNG Files",
             variable=self.keep_png_var
         ).grid(row=1, column=0, columnspan=3, sticky="w", pady=(10, 0))
 
@@ -98,13 +98,13 @@ class PDFConverterApp:
         btn_frame = ttk.Frame(main)
         btn_frame.pack(fill="x", pady=(4, 12))
 
-        self.convert_btn = ttk.Button(btn_frame, text="开始转换", command=self.start_conversion)
+        self.convert_btn = ttk.Button(btn_frame, text="Start Conversion", command=self.start_conversion)
         self.convert_btn.pack(side="left")
 
-        ttk.Button(btn_frame, text="打开输出目录", command=self.open_output_dir).pack(side="left", padx=(8, 0))
+        ttk.Button(btn_frame, text="Open Output Directory", command=self.open_output_dir).pack(side="left", padx=(8, 0))
 
         # Progress
-        prog_frame = ttk.LabelFrame(main, text="4. 进度", padding=12)
+        prog_frame = ttk.LabelFrame(main, text="4. Progress", padding=12)
         prog_frame.pack(fill="x", pady=(0, 12))
 
         self.progress = ttk.Progressbar(
@@ -114,12 +114,12 @@ class PDFConverterApp:
         ttk.Label(prog_frame, textvariable=self.status_var).pack(anchor="w", pady=(8, 0))
 
         # Log box
-        log_frame = ttk.LabelFrame(main, text="日志", padding=12)
+        log_frame = ttk.LabelFrame(main, text="Log", padding=12)
         log_frame.pack(fill="both", expand=True)
 
         self.log_text = tk.Text(log_frame, height=12, wrap="word")
         self.log_text.pack(fill="both", expand=True)
-        self.log("程序已启动。")
+        self.log("Program started.")
 
         self._check_dependencies()
 
@@ -134,38 +134,38 @@ class PDFConverterApp:
             missing.append("pillow")
 
         if missing:
-            self.log("缺少依赖: " + ", ".join(missing))
-            self.log("请先安装：pip install " + " ".join(missing))
+            self.log("Missing dependencies: " + ", ".join(missing))
+            self.log("Please install first: pip install " + " ".join(missing))
             messagebox.showwarning(
-                "缺少依赖",
-                "检测到缺少依赖：\n\n"
+                "Missing Dependencies",
+                "Missing dependencies detected:\n\n"
                 + "\n".join(missing)
-                + "\n\n请先运行：\n"
+                + "\n\nPlease install first:\n"
                 + "pip install " + " ".join(missing)
             )
 
     def browse_pdf(self):
         path = filedialog.askopenfilename(
-            title="选择 PDF",
-            filetypes=[("PDF 文件", "*.pdf")]
+            title="Select PDF",
+            filetypes=[("PDF Files", "*.pdf")]
         )
         if path:
             self.pdf_path.set(path)
-            self.log(f"已选择 PDF: {path}")
+            self.log(f"Selected PDF: {path}")
 
     def browse_output_dir(self):
-        path = filedialog.askdirectory(title="选择输出目录")
+        path = filedialog.askdirectory(title="Select Output Directory")
         if path:
             self.output_dir.set(path)
-            self.log(f"已选择输出目录: {path}")
+            self.log(f"Selected output directory: {path}")
 
     def open_output_dir(self):
         path = self.output_dir.get().strip()
         if not path:
-            messagebox.showerror("错误", "输出目录为空。")
+            messagebox.showerror("Error", "Output directory is empty.")
             return
         if not os.path.isdir(path):
-            messagebox.showerror("错误", "输出目录不存在。")
+            messagebox.showerror("Error", "Output directory does not exist.")
             return
 
         try:
@@ -175,7 +175,7 @@ class PDFConverterApp:
                 import subprocess
                 subprocess.Popen(["xdg-open", path])
         except Exception as e:
-            messagebox.showerror("错误", f"无法打开输出目录：{e}")
+            messagebox.showerror("Error", f"Unable to open output directory: {e}")
 
     def log(self, text: str):
         self.log_text.insert("end", text + "\n")
@@ -191,23 +191,23 @@ class PDFConverterApp:
 
     def start_conversion(self):
         if fitz is None or Image is None:
-            messagebox.showerror("错误", "依赖未安装完整，请先安装 pymupdf 和 pillow。")
+            messagebox.showerror("Error", "Dependencies are not installed completely. Please install pymupdf and pillow.")
             return
 
         pdf_path = self.pdf_path.get().strip()
         output_dir = self.output_dir.get().strip()
 
         if not pdf_path:
-            messagebox.showerror("错误", "请先选择输入 PDF。")
+            messagebox.showerror("Error", "Please select an input PDF.")
             return
         if not os.path.isfile(pdf_path):
-            messagebox.showerror("错误", "输入 PDF 不存在。")
+            messagebox.showerror("Error", "Input PDF does not exist.")
             return
         if not output_dir:
-            messagebox.showerror("错误", "请先选择输出目录。")
+            messagebox.showerror("Error", "Please select an output directory.")
             return
         if not os.path.isdir(output_dir):
-            messagebox.showerror("错误", "输出目录不存在。")
+            messagebox.showerror("Error", "Output directory does not exist.")
             return
 
         try:
@@ -215,12 +215,12 @@ class PDFConverterApp:
             if scale <= 0:
                 raise ValueError
         except Exception:
-            messagebox.showerror("错误", "scale 必须是大于 0 的数字，例如 2.0。")
+            messagebox.showerror("Error", "Scale must be a number greater than 0, e.g., 2.0.")
             return
 
         self.convert_btn.config(state="disabled")
         self.set_progress(0)
-        self.set_status("开始转换…")
+        self.set_status("Starting conversion…")
         self.log("=" * 60)
 
         worker = threading.Thread(
@@ -238,15 +238,15 @@ class PDFConverterApp:
 
             png_dir.mkdir(parents=True, exist_ok=True)
 
-            self.safe_log(f"开始处理: {pdf_path}")
-            self.safe_log(f"PNG 输出目录: {png_dir}")
-            self.safe_log(f"重组 PDF 输出: {rebuilt_pdf}")
+            self.safe_log(f"Starting processing: {pdf_path}")
+            self.safe_log(f"PNG output directory: {png_dir}")
+            self.safe_log(f"Rebuilt PDF output: {rebuilt_pdf}")
 
             doc = fitz.open(pdf_path)
             total_pages = len(doc)
 
             if total_pages == 0:
-                raise RuntimeError("PDF 没有页面。")
+                raise RuntimeError("PDF has no pages.")
 
             png_paths = []
 
@@ -260,8 +260,8 @@ class PDFConverterApp:
 
                 progress = (i + 1) / total_pages * 70
                 self.safe_progress(progress)
-                self.safe_status(f"正在导出 PNG：第 {i+1}/{total_pages} 页")
-                self.safe_log(f"已导出 PNG: {png_path.name}")
+                self.safe_status(f"Exporting PNG: Page {i+1}/{total_pages}")
+                self.safe_log(f"Exported PNG: {png_path.name}")
 
             doc.close()
 
@@ -273,7 +273,7 @@ class PDFConverterApp:
 
                 progress = 70 + (i + 1) / total_pages * 25
                 self.safe_progress(progress)
-                self.safe_status(f"正在重组 PDF：第 {i+1}/{total_pages} 页")
+                self.safe_status(f"Rebuilding PDF: Page {i+1}/{total_pages}")
 
             first, rest = pil_images[0], pil_images[1:]
             first.save(str(rebuilt_pdf), save_all=True, append_images=rest)
@@ -294,17 +294,17 @@ class PDFConverterApp:
                     pass
 
             self.safe_progress(100)
-            self.safe_status("转换完成")
-            self.safe_log(f"完成。输出文件：{rebuilt_pdf}")
-            self.root.after(0, lambda: messagebox.showinfo("完成", f"转换完成！\n\n输出文件：\n{rebuilt_pdf}"))
+            self.safe_status("Conversion completed")
+            self.safe_log(f"Completed. Output file: {rebuilt_pdf}")
+            self.root.after(0, lambda: messagebox.showinfo("Completed", f"Conversion completed!\n\nOutput file:\n{rebuilt_pdf}"))
 
         except Exception as e:
             error_message = str(e)
             err = traceback.format_exc()
-            self.safe_log("发生错误：")
+            self.safe_log("Error occurred:")
             self.safe_log(err)
-            self.safe_status("转换失败")
-            self.root.after(0, lambda msg=error_message: messagebox.showerror("错误", f"转换失败：\n{msg}"))
+            self.safe_status("Conversion failed")
+            self.root.after(0, lambda msg=error_message: messagebox.showerror("Error", f"Conversion failed:\n{msg}"))
         finally:
             self.root.after(0, lambda: self.convert_btn.config(state="normal"))
 
