@@ -1,0 +1,33 @@
+Mac Users Warning!!!
+
+When running pdf_png_rebuild_gui.py on macOS, you may see a completely white GUI window.
+
+This happens because the system Python on macOS uses Tk 8.5, which is too old to render the GUI properly.
+
+Problem
+GUI window opens but stays blank.
+The program is actually running, but you cannot see the interface.
+Tk 8.5 is deprecated and incompatible with modern macOS.
+Solution
+Install official Python from python.org
+Download: https://www.python.org/downloads/mac-osx/
+
+Do not use the system Python (/usr/bin/python3).
+
+Check Tk version
+
+/Library/Frameworks/Python.framework/Versions/3.xx/bin/python3 -c "import tkinter; print(tkinter.TkVersion)"
+
+It should return 8.6 or higher.
+
+Create a new virtual environment with the new Python
+
+/Library/Frameworks/Python.framework/Versions/3.xx/bin/python3 -m venv .venv_fixed
+source .venv_fixed/bin/activate
+pip install pymupdf pillow
+
+Run the GUI
+
+python pdf_png_rebuild_gui.py
+
+Note: Using a virtual environment created with old system Python will still result in a white screen.
