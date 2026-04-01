@@ -13,7 +13,9 @@ How does it work:
 4. Output the new PDF to the selected directory, with "_rebuilt_from_png" suffix
 """
 
+from importlib.resources import path
 import os
+import sys
 import threading
 import traceback
 import tkinter as tk
@@ -171,6 +173,8 @@ class PDFConverterApp:
         try:
             if os.name == "nt":
                 os.startfile(path)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", path])
             else:
                 import subprocess
                 subprocess.Popen(["xdg-open", path])
