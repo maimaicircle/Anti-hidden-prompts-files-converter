@@ -7,3 +7,5 @@ If you are not sure whether it is the problem with the tk or sth else you can ru
 Remember to install latest python version to get the correct tk:
 
 https://www.python.org/downloads/
+
+If there is a problem on mac tk see IF_WHITE_SCREEN_ON_MAC.txt
